@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Cinefellas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">CINEfellas</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <span class="nav-link username-display" id="usernameDisplay"></span>
+                    </li>
+                    <li class="nav-item">
+                        <form class="search-form">
+                            <input type="text" class="search-input" placeholder="Search movies..." aria-label="Search">
+                            <button type="submit" class="search-button"><i class="fas fa-search"></i></button>
+                        </form>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://localhost:3000/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">My List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="signOut">Sign Out</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header section -->
+    <div class="section-header">
+        <h1>Popular Movies and Shows</h1>
+        <p>Watch the best content from all genres</p>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="text-center" style="display: none; padding: 20px;">
+        <p>Loading posters...</p>
+    </div>
+
+    <!-- Movie grid -->
+    <div class="movie-grid" id="movieGrid">
+        <!-- Movies will be populated dynamically -->
+    </div>
+
+    <div class="text-center">
+        <button class="recommend-btn" id="recommendBtn">Pick a Movie for Me</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>© 2025 Cinefellas. All rights reserved.</p>
+        <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        // Import the movies array and fetch function from movies.js
+        import { movies, fetchMoviePosters } from './movies.js';
+
+        function populateMovieGrid(preferences, language) {
+            const movieGrid = document.getElementById('movieGrid');
+            movieGrid.innerHTML = ''; // Clear existing content
+
+            // Validate inputs
+            if (!preferences) {
+                console.error('Preferences are undefined or null:', preferences);
+                preferences = ['Action', 'Comedy', 'Drama']; // Fallback
+            }
+            if (!language) {
+                console.error('Language is undefined or null:', language);
+                language = 'English'; // Fallback
+            }
+
+            // Ensure preferences is an array
+            const prefArray = Array.isArray(preferences) ? preferences : preferences.split(',').map(p => p.trim());
+            console.log('Filtering movies with:', { preferences: prefArray, language });
+
+            // Filter movies by preferences and language
+            const filteredMovies = movies.filter(movie => {
+                if (!movie.genres || !Array.isArray(movie.genres)) {
+                    console.warn(`Invalid genres for movie: ${movie.title}`, movie.genres);
+                    return false;
+                }
+                if (!movie.language) {
+                    console.warn(`Invalid language for movie: ${movie.title}`, movie.language);
+                    return false;
+                }
+                const genreMatch = movie.genres.some(genre => 
+                    prefArray.some(pref => pref.toLowerCase() === genre.toLowerCase())
+                );
+                const languageMatch = movie.language.toLowerCase() === language.toLowerCase();
+                return genreMatch && languageMatch;
+            });
+
+            if (filteredMovies.length === 0) {
+                console.log('No movies found matching criteria:', { preferences: prefArray, language });
+                movieGrid.innerHTML = '<p>No movies match your preferences and language.</p>';
+                return filteredMovies;
+            }
+
+            // Limit to exactly 10 movies for 2x5 grid
+            const limitedMovies = filteredMovies.slice(0, 10);
+
+            // Populate grid with placeholders first
+            limitedMovies.forEach(movie => {
+                const placeholderSrc = `https://placehold.co/200x300?text=${encodeURIComponent(movie.title)}`;
+                const movieItem = `
+                    <div class="movie-item" data-title="${movie.title}">
+                        <img src="${placeholderSrc}" alt="${movie.title}" onerror="this.src='https://placehold.co/200x300?text=${encodeURIComponent(movie.title)}';">
+                        <div class="overlay">
+                            <div class="play-btn"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                `;
+                movieGrid.innerHTML += movieItem;
+            });
+            console.log('Filtered movies (limited to 10):', limitedMovies.map(m => m.title));
+            return limitedMovies;
+        }
+
+        function updateMoviePoster(title, posterUrl) {
+            const movieItems = document.querySelectorAll(`.movie-item[data-title="${title}"]`);
+            movieItems.forEach(item => {
+                const img = item.querySelector('img');
+                if (posterUrl && posterUrl !== "https://via.placeholder.com/500x750?text=Error") {
+                    img.src = posterUrl;
+                }
+            });
+        }
+
+        const fetchUserData = async () => {
+            const token = localStorage.getItem('token');
+            console.log('Token from localStorage:', token);
+            if (!token) {
+                console.error('No token found in localStorage');
+                document.getElementById('usernameDisplay').textContent = 'Welcome, Guest';
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1000);
+                return null;
+            }
+            try {
+                const res = await fetch('/api/user', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                console.log('Fetch response status:', res.status);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! Status: ${res.status}`);
+                }
+                const data = await res.json();
+                console.log('User data response:', data);
+                if (data.success && data.user) {
+                    if (!data.user.preferences || !data.user.language) {
+                        console.warn('User data missing preferences or language:', data.user);
+                    }
+                    return { 
+                        username: data.user.username || 'Guest',
+                        preferences: data.user.preferences || ['Action', 'Comedy', 'Drama'],
+                        language: data.user.language || 'English'
+                    };
+                } else {
+                    throw new Error(data.message || 'Failed to fetch user data');
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error.message);
+                document.getElementById('usernameDisplay').textContent = 'Welcome, Guest';
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1000);
+                return null;
+            }
+        };
+
+        (async () => {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const movieGrid = document.getElementById('movieGrid');
+
+            // Fetch user data
+            let userData = null;
+            try {
+                userData = await fetchUserData();
+                if (userData) {
+                    console.log('User data loaded:', userData);
+                    document.getElementById('usernameDisplay').textContent = `Welcome, ${userData.username}`;
+                } else {
+                    console.log('No user data, using defaults');
+                    document.getElementById('usernameDisplay').textContent = 'Welcome, Guest';
+                }
+            } catch (error) {
+                console.error('Failed to fetch user data:', error);
+                document.getElementById('usernameDisplay').textContent = 'Welcome, Guest';
+            }
+
+            // Populate grid immediately with placeholders
+            let filteredMovies = [];
+            if (userData) {
+                filteredMovies = populateMovieGrid(userData.preferences, userData.language);
+            } else {
+                filteredMovies = populateMovieGrid(['Action', 'Comedy', 'Drama'], 'English');
+            }
+
+            // Show grid immediately
+            movieGrid.style.display = 'block';
+
+            // Fetch posters in the background
+            if (filteredMovies.length > 0) {
+                loadingIndicator.style.display = 'block';
+                try {
+                    console.log('Starting to fetch movie posters...');
+                    await fetchMoviePosters(filteredMovies, updateMoviePoster);
+                    console.log('Finished fetching movie posters.');
+                } catch (error) {
+                    console.error('Error fetching posters:', error);
+                } finally {
+                    loadingIndicator.style.display = 'none';
+                }
+            }
+        })();
+
+        document.getElementById('signOut').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('language');
+            localStorage.removeItem('preferences');
+            window.location.href = '/login.html';
+        });
+
+        document.querySelector('.search-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = document.querySelector('.search-input').value;
+            alert(`Searching for: ${query}`);
+        });
+
+        document.getElementById('recommendBtn').addEventListener('click', async () => {
+            const userData = await fetchUserData();
+            if (!userData) return;
+            const prefArray = Array.isArray(userData.preferences) ? userData.preferences : userData.preferences.split(',').map(p => p.trim());
+            const filteredMovies = movies.filter(movie => {
+                if (!movie.genres || !Array.isArray(movie.genres) || !movie.language) {
+                    return false;
+                }
+                return movie.genres.some(genre => 
+                    prefArray.some(pref => pref.toLowerCase() === genre.toLowerCase())
+                ) && movie.language.toLowerCase() === userData.language.toLowerCase();
+            });
+            if (filteredMovies.length > 0) {
+                const randomMovie = filteredMovies[Math.floor(Math.random() * filteredMovies.length)];
+                alert(`We recommend: ${randomMovie.title}`);
+            } else {
+                alert('No movies match your preferences and language.');
+            }
+        });
+    </script>
+</body>
+</html>

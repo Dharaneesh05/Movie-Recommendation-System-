@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie App</title>
+    <style>
+        #moviesGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .movie-card {
+            text-align: center;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .movie-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .movie-card h2 {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        .movie-card p {
+            color: #666;
+        }
+        #loadingSpinner {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            display: none;
+        }
+        #loadingSpinner.active {
+            display: block;
+        }
+        #controls {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        #searchBar {
+            padding: 5px;
+            width: 200px;
+        }
+        select {
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <input type="text" id="searchBar" placeholder="Search by title...">
+        <select id="languageFilter">
+            <option value="">All Languages</option>
+            <option value="Tamil">Tamil</option>
+            <option value="Telugu">Telugu</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Malayalam">Malayalam</option>
+            <option value="Kannada">Kannada</option>
+            <option value="English">English</option>
+        </select>
+        <select id="genreFilter">
+            <option value="">All Genres</option>
+            <option value="Action">Action</option>
+            <option value="Thriller">Thriller</option>
+            <option value="Horror">Horror</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Drama">Drama</option>
+            <option value="Comedy">Comedy</option>
+        </select>
+    </div>
+    <div id="loadingSpinner">Loading movies...</div>
+    <div id="moviesGrid"></div>
+    <script type="module" src="movies.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>

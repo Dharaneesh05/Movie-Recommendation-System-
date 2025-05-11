@@ -1,0 +1,179 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Arial", sans-serif;
+  background-color: #141414;
+  background-image: url("0_UM468JCN5WDncDct.jpg");
+}
+.section-header {
+  text-align: center;
+  color: white;
+  margin-top: 100px; /* pushes text below navbar */
+  margin-bottom: 30px;
+  z-index: 1;
+  position: relative;
+}
+.section-header h1 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+.section-header p {
+  font-size: 1.2em;
+  color: #fff9f9;
+  font-weight: bolder;
+}
+.navbar {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+  background: rgba(20, 20, 20, 0.9); /* Slight transparency for depth */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+.navbar-brand {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #edebeb; /* Matches index.html/login.html */
+  font-family: "Arial", sans-serif;
+  transition: color 0.3s ease;
+}
+.navbar-brand:hover {
+  color: #ffca28; /* Hover color from index.html */
+}
+.navbar a.nav-link {
+  color: #ffffff; /* White text, matching index.html */
+  font-family: "Arial", sans-serif;
+  font-size: 1rem;
+  margin-left: 15px;
+  transition: color 0.3s ease;
+}
+.navbar a.nav-link:hover {
+  color: #ffca28; /* Hover color from index.html */
+}
+.navbar .search-form {
+  margin-left: 15px;
+  display: flex;
+  align-items: center;
+}
+.navbar .search-input {
+  background-color: #333;
+  border: 1px solid #ffca28;
+  color: #ffffff;
+  font-family: "Arial", sans-serif;
+  padding: 5px 10px;
+  border-radius: 5px 0 0 5px;
+  font-size: 1rem;
+  width: 200px;
+}
+.navbar .search-button {
+  background-color: #ffca28;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.navbar .search-button:hover {
+  background-color: #ffca28;
+}
+.navbar .search-button i {
+  color: #ffffff;
+  font-size: 1rem;
+}
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns for 5x2 grid */
+  grid-template-rows: repeat(5, auto); /* 5 rows */
+  gap: 10px; /* Reduced gap for compact look */
+  padding: 20px;
+  max-width: 350px; /* Adjusted to fit 2 columns of 200px posters with gap */
+  margin: 0 auto; /* Center the grid */
+}
+.movie-grid .movie-item {
+  position: relative;
+  width: 250px; /* Fixed width for compact posters */
+  padding-bottom: 150%; /* Aspect ratio 200x300 (300/200 = 1.5) */
+  background-color: #333;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.movie-grid .movie-item img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+.movie-grid .movie-item:hover {
+  transform: scale(1.05);
+}
+.movie-grid .movie-item:hover img {
+  opacity: 0.7;
+}
+.movie-grid .movie-item .overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  padding: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.movie-grid .movie-item:hover .overlay {
+  opacity: 1;
+}
+.play-btn {
+  font-size: 1.5rem; /* Slightly smaller for compact size */
+  color: white;
+  cursor: pointer;
+}
+.recommend-btn {
+  background-color: #ffca28; /* Matches index.html */
+  color: #ffffff;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 20px;
+  font-family: "Arial", sans-serif;
+  transition: background-color 0.3s ease;
+  color: black;
+  font-weight: bold;
+}
+.recommend-btn:hover {
+  background-color: #ffca28; /* Matches index.html */
+  color: black;
+  font-weight: bold;
+}
+.footer {
+  background-color: #141414;
+  padding: 30px 20px;
+  text-align: center;
+  color: #ffffff;
+}
+.footer a {
+  color: #ffffff;
+  text-decoration: none;
+  font-family: "Arial", sans-serif;
+  transition: color 0.3s ease;
+}
+.footer a:hover {
+  color: #ffca28; /* Matches index.html hover */
+}
+.username-display {
+  color: #ffffff; /* Matches index.html */
+  font-size: 1rem;
+  margin-left: 15px;
+  font-family: "Arial", sans-serif;
+}

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="site-title-container">
+        <div class="site-title">
+            <span>C</span>
+            <span>I</span>
+            <span>N</span>
+            <span>E</span>
+            <span>f</span>
+            <span>e</span>
+            <span>l</span>
+            <span>l</span>
+            <span>a</span>
+            <span>s</span>
+        </div>
+    </div>
+    <div class="container shadow-lg">
+        <h2 class="text-center mb-3">Sign Up</h2>
+        <form id="registrationForm">
+            <table>
+                <tr>
+                    <td><label for="username" class="form-label">Username</label></td>
+                    <td><input type="text" id="username" class="form-control" required></td>
+                </tr>
+                <tr>
+                    <td><label for="email" class="form-label">Email</label></td>
+                    <td><input type="email" id="email" class="form-control" required></td>
+                </tr>
+                <tr>
+                    <td><label for="password" class="form-label">Password</label></td>
+                    <td>
+                        <div class="input-group">
+                            <input type="password" id="password" class="form-control" required>
+                            <span class="input-group-text" id="togglePassword">
+                                <i class="bi bi-eye-slash"></i>
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td><button type="button" id="generateOtp">Generate OTP</button></td>
+                    <td><input type="text" id="otp" class="form-control" placeholder="Enter OTP" required></td>
+                </tr>
+                <tr>
+                    <td><label for="dob" class="form-label">Date of Birth</label></td>
+                    <td><input type="date" id="dob" class="form-control" required></td>
+                </tr>
+                <tr>
+                    <td><label for="number" class="form-label">Mobile Number</label></td>
+                    <td><input type="number" id="number" class="form-control" required maxlength="10" oninput="this.value = this.value.slice(0, 10);"></td>
+                </tr>
+                <tr>
+                    <td><label for="language" class="form-label">Preferred Language</label></td>
+                    <td>
+                        <select id="language" class="form-select" required>
+                            <option value="">Select your preferred</option>
+                            <option value="tamil">Tamil</option>
+                            <option value="english">English</option>
+                            <option value="hindi">Hindi</option>
+                            <option value="telegu">Telegu</option>
+                            <option value="malayalam">Malayalam</option>
+                            <option value="kannada">Kannada</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="preferences" class="form-label">Preferences</label></td>
+                    <td>
+                        <select id="preferences" class="form-select" required>
+                            <option value="">Select your favorite genres</option>
+                            <option value="action">Action</option>
+                            <option value="thriller">Thriller</option>
+                            <option value="fantasy">Fantasy</option>
+                            <option value="comedy">Comedy</option>
+                            <option value="drama">Drama</option>
+                            <option value="horror">Horror</option>
+                            <option value="romance">Romance</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <button type="submit" id="register">Register</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', () => {
+            const passwordInput = document.getElementById('password');
+            const icon = document.querySelector('#togglePassword i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            }
+        });
+
+        document.getElementById('generateOtp').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            try {
+                const res = await fetch('/api/generate-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message || 'OTP sent to your email');
+                } else {
+                    alert(data.message || 'Failed to generate OTP');
+                }
+            } catch (err) {
+                alert('Error connecting to server. Please try again.');
+            }
+        });
+
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const body = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value.toLowerCase(),
+                password: document.getElementById('password').value,
+                dob: document.getElementById('dob').value,
+                number: document.getElementById('number').value,
+                language: document.getElementById('language').value,
+                preferences: [document.getElementById('preferences').value], // CHANGE: Store as array
+                otp: document.getElementById('otp').value
+            };
+
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    // CHANGE: Store language and preferences in localStorage
+                    localStorage.setItem('language', body.language);
+                    localStorage.setItem('preferences', JSON.stringify(body.preferences));
+                    alert('Registration successful! Please log in.');
+                    window.location.href = '/login.html';
+                } else {
+                    alert(data.message || 'Registration failed');
+                }
+            } catch (err) {
+                alert('Error connecting to server. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
